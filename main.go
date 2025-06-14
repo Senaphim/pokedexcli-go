@@ -8,13 +8,16 @@ import (
 )
 
 func main() {
+	commands := getCommands()
+
+	// Infinite loop to read user input
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokédex > ")
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		fmt.Println(fmt.Sprintf("Your command was: %v", cleaned[0]))
+		commands[cleaned[0]].callback()
 	}
 }
 
