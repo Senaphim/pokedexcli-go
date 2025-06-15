@@ -6,19 +6,24 @@ import (
 )
 
 type Location struct {
-	name string
+	Name string
 	url  string
 }
 
 type Locations20 struct {
 	count    int
-	next     *string
-	previous *string
-	results  []Location
+	Next     *string
+	Previous *string
+	Results  []Location
 }
 
-func ListLocations(url string) (Locations20, error) {
-	res, err := http.Get(url)
+func ListLocations(url *string) (Locations20, error) {
+	apiUrl := baseurl + "/location-area"
+	if url != nil {
+		apiUrl = *url
+	}
+
+	res, err := http.Get(apiUrl)
 	if err != nil {
 		return Locations20{}, err
 	}

@@ -7,12 +7,13 @@ import (
 	"strings"
 )
 
-type config struct {
+type configuration struct {
 	nextUrl *string
 	prevUrl *string
 }
 
 func main() {
+	var config configuration
 	commands := getCommands()
 
 	// Infinite loop to read user input
@@ -22,7 +23,7 @@ func main() {
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		commands[cleaned[0]].callback()
+		commands[cleaned[0]].callback(&config)
 	}
 }
 
