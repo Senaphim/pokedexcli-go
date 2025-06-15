@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+type config struct {
+	nextUrl *string
+	prevUrl *string
+}
+
 func main() {
 	commands := getCommands()
 
