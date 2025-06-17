@@ -5,12 +5,13 @@ import (
 	"os"
 
 	"github.com/senaphim/pokedexcli/internal/pokeapi"
+	"github.com/senaphim/pokedexcli/internal/pokecache"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*configuration) error
+	callback    func(*configuration, *pokecache.Cache) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -40,13 +41,13 @@ func getCommands() map[string]cliCommand {
 	return commands
 }
 
-func commandExit(*configuration) error {
+func commandExit(*configuration, *pokecache.Cache) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(*configuration) error {
+func commandHelp(*configuration, *pokecache.Cache) error {
 	commands := getCommands()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
@@ -57,7 +58,7 @@ func commandHelp(*configuration) error {
 	return nil
 }
 
-func commandMap(config *configuration) error {
+func commandMap(config *configuration, cache *pokecache.Cache) error {
 	// Inserted this code to handle if you got to the end of the map but triggers on the first
 	// TODO: Needs special casing on the first call ...
 	// if config.nextUrl == nil {
@@ -65,7 +66,7 @@ func commandMap(config *configuration) error {
 	// 	return nil
 	// }
 
-	locationsList, err := pokeapi.ListLocations(config.nextUrl)
+	locationsList, err := pokeapi.ListLocations(config.nextUrl, cache)
 	if err != nil {
 		return err
 	}
@@ -80,13 +81,13 @@ func commandMap(config *configuration) error {
 	return nil
 }
 
-func commandMapb(config *configuration) error {
+func commandMapb(config *configuration, cache *pokecache.Cache) error {
 	if config.prevUrl == nil {
 		fmt.Println("You're on the first page")
 		return nil
 	}
 
-	locationsList, err := pokeapi.ListLocations(config.nextUrl)
+	locationsList, err := pokeapi.ListLocations(config.nextUrl, cache)
 	if err != nil {
 		return err
 	}

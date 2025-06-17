@@ -2,7 +2,10 @@ package pokeapi
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
+
+	"github.com/senaphim/pokedexcli/internal/pokecache"
 )
 
 type Location struct {
@@ -17,10 +20,18 @@ type Locations20 struct {
 	Results  []Location
 }
 
-func ListLocations(url *string) (Locations20, error) {
+func ListLocations(url *string, cache *pokecache.Cache) (Locations20, error) {
 	apiUrl := baseurl + "/location-area"
 	if url != nil {
 		apiUrl = *url
+	}
+
+	if data, ok := cache.Get(apiUrl); ok {
+		var locations Locations20
+		if err := json.Unmarshal(data, &locations); err != nil {
+			return Locations20{}, nil
+		}
+		return locations, nil
 	}
 
 	res, err := http.Get(apiUrl)
@@ -35,5 +46,7 @@ func ListLocations(url *string) (Locations20, error) {
 		return Locations20{}, err
 	}
 
+	dat, _ := io.ReadAll(res.Body)
+	cache.Add(*url, dat)
 	return locations, nil
 }

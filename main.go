@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/senaphim/pokedexcli/internal/pokecache"
 )
 
 type configuration struct {
@@ -14,6 +17,7 @@ type configuration struct {
 
 func main() {
 	var config configuration
+	cache := pokecache.NewCache(5 * time.Second)
 	commands := getCommands()
 
 	// Infinite loop to read user input
@@ -23,7 +27,7 @@ func main() {
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		commands[cleaned[0]].callback(&config)
+		commands[cleaned[0]].callback(&config, &cache)
 	}
 }
 
