@@ -11,7 +11,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*configuration, *pokecache.Cache) error
+	callback    func(*configuration, *pokecache.Cache, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -37,17 +37,22 @@ func getCommands() map[string]cliCommand {
 			description: "As map, but returns to the previous list of locations",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Takes one argument of location. Displays pokeman catchable at that location",
+			callback:    commandExplore,
+		},
 	}
 	return commands
 }
 
-func commandExit(*configuration, *pokecache.Cache) error {
+func commandExit(*configuration, *pokecache.Cache, ...string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(*configuration, *pokecache.Cache) error {
+func commandHelp(*configuration, *pokecache.Cache, ...string) error {
 	commands := getCommands()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
@@ -58,7 +63,7 @@ func commandHelp(*configuration, *pokecache.Cache) error {
 	return nil
 }
 
-func commandMap(config *configuration, cache *pokecache.Cache) error {
+func commandMap(config *configuration, cache *pokecache.Cache, _ ...string) error {
 	// Inserted this code to handle if you got to the end of the map but triggers on the first
 	// TODO: Needs special casing on the first call ...
 	// if config.nextUrl == nil {
@@ -81,7 +86,7 @@ func commandMap(config *configuration, cache *pokecache.Cache) error {
 	return nil
 }
 
-func commandMapb(config *configuration, cache *pokecache.Cache) error {
+func commandMapb(config *configuration, cache *pokecache.Cache, _ ...string) error {
 	if config.prevUrl == nil {
 		fmt.Println("You're on the first page")
 		return nil
@@ -97,6 +102,21 @@ func commandMapb(config *configuration, cache *pokecache.Cache) error {
 
 	for _, location := range locationsList.Results {
 		fmt.Println(fmt.Sprintf("%s", location.Name))
+	}
+
+	return nil
+}
+
+func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string) error {
+	locationDetails, err := pokeapi.ExploreLocation(location[0], cache)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("%v", locationDetails))
+
+	for _, mon := range locationDetails.Encounters {
+		fmt.Println(fmt.Sprintf("%s", mon.Pokemon.Name))
 	}
 
 	return nil

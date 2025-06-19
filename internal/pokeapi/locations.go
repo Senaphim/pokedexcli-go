@@ -46,7 +46,9 @@ func ListLocations(url *string, cache *pokecache.Cache) (Locations20, error) {
 		return Locations20{}, err
 	}
 
+	// No error checking needed for this as if it were going to fail it would
+	// have broken when decoding to json at the previous step
 	dat, _ := io.ReadAll(res.Body)
-	cache.Add(*url, dat)
+	cache.Add(apiUrl, dat)
 	return locations, nil
 }

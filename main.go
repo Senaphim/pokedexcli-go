@@ -27,7 +27,15 @@ func main() {
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		commands[cleaned[0]].callback(&config, &cache)
+		var arg string
+		if len(cleaned) > 1 {
+			arg = cleaned[1]
+		}
+		err := commands[cleaned[0]].callback(&config, &cache, arg)
+		if err != nil {
+			fmt.Println(fmt.Errorf("Encountered error whilst running command %v: %v",
+				commands[cleaned[0]].name, err))
+		}
 	}
 }
 
