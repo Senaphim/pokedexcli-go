@@ -31,7 +31,13 @@ func main() {
 		if len(cleaned) > 1 {
 			arg = cleaned[1]
 		}
-		err := commands[cleaned[0]].callback(&config, &cache, arg)
+
+		command, ok := commands[cleaned[0]]
+		if !ok {
+			fmt.Println("That command does not exist")
+		}
+
+		err := command.callback(&config, &cache, arg)
 		if err != nil {
 			fmt.Println(fmt.Errorf("Encountered error whilst running command %v: %v",
 				commands[cleaned[0]].name, err))
