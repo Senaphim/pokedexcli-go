@@ -9,58 +9,61 @@ import (
 	"github.com/senaphim/pokedexcli/internal/pokecache"
 )
 
-type NamedObject struct {
-	Name string
-	Url  string
-}
-
-type Rate struct {
-	rate    int
-	version NamedObject
-}
-
-type EncounterMethod struct {
-	method         NamedObject
-	versionDetails []Rate
-}
-
-type Language struct {
-	language NamedObject
-	name     string
-}
-
-type EncounterDetails struct {
-	chance          int
-	conditionValues []any
-	maxLevel        int
-	method          NamedObject
-	minLevel        int
-}
-
-type Encounters struct {
-	encounterDetails []EncounterDetails
-	maxChance        int
-	version          NamedObject
-}
-
-type Pokemon struct {
-	Pokemon        NamedObject
-	versionDetails []Encounters
-}
-
 type LocationDetails struct {
-	encounterMethodRates []EncounterMethod
-	gameIndex            int
-	id                   int
-	location             NamedObject
-	name                 string
-	names                []Language
-	Encounters           []Pokemon
+	EncounterMethodRates []struct {
+		EncounterMethod struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"encounter_method"`
+		VersionDetails []struct {
+			Rate    int `json:"rate"`
+			Version struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"encounter_method_rates"`
+	GameIndex int `json:"game_index"`
+	ID        int `json:"id"`
+	Location  struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"location"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	PokemonEncounters []struct {
+		Pokemon struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"pokemon"`
+		VersionDetails []struct {
+			EncounterDetails []struct {
+				Chance          int   `json:"chance"`
+				ConditionValues []any `json:"condition_values"`
+				MaxLevel        int   `json:"max_level"`
+				Method          struct {
+					Name string `json:"name"`
+					URL  string `json:"url"`
+				} `json:"method"`
+				MinLevel int `json:"min_level"`
+			} `json:"encounter_details"`
+			MaxChance int `json:"max_chance"`
+			Version   struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"pokemon_encounters"`
 }
 
 func ExploreLocation(location string, cache *pokecache.Cache) (LocationDetails, error) {
 	apiUrl := baseurl + "/location-area/" + location
-	fmt.Println(fmt.Sprintf("Api target: %v", apiUrl))
 	var details LocationDetails
 
 	if data, ok := cache.Get(apiUrl); ok {
@@ -89,14 +92,7 @@ func ExploreLocation(location string, cache *pokecache.Cache) (LocationDetails, 
 		fmtErr := fmt.Errorf("Encountered error unmarshalling json: %v", err)
 		return LocationDetails{}, fmtErr
 	}
-	// decoder := json.NewDecoder(res.Body)
-	// if err := decoder.Decode(&details); err != nil {
-	// 	fmtErr := fmt.Errorf("Ecountered error decoding response body: %v", err)
-	// 	return LocationDetails{}, fmtErr
-	// }
-	// fmt.Println("Decoded successfully")
 
-	// No error handling needed as error wouuld be thrown at json decode
 	cache.Add(apiUrl, dat)
 	return details, nil
 }

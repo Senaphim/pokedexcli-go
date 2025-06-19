@@ -113,9 +113,7 @@ func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("%v", locationDetails))
-
-	for _, mon := range locationDetails.Encounters {
+	for _, mon := range locationDetails.PokemonEncounters {
 		fmt.Println(fmt.Sprintf("%s", mon.Pokemon.Name))
 	}
 
