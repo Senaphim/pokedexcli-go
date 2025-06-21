@@ -40,7 +40,7 @@ func main() {
 		err := command.callback(&config, &cache, arg)
 		if err != nil {
 			fmt.Println(fmt.Errorf("Encountered error whilst running command %v: %v",
-				commands[cleaned[0]].name, err))
+				command.name, err))
 		}
 	}
 }

@@ -119,3 +119,8 @@ func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string
 
 	return nil
 }
+
+func commandCatch(_ *configuration, cache *pokecache.Cache, location ...string) error {
+
+	return nil
+}

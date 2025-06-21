@@ -35,7 +35,7 @@ func TestListLocation(t *testing.T) {
 		},
 	}
 
-	// TODO - make these tests work ... issues with segfaults and pointer
+	// TODO: make these tests work ... issues with segfaults and pointer
 	// dereferencing ... I thought that wasn't supposed to happen in go XD
 	for range cases {
 		time.Sleep(1)
