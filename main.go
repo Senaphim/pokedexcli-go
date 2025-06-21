@@ -30,17 +30,13 @@ func main() {
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		var arg string
-		if len(cleaned) > 1 {
-			arg = cleaned[1]
-		}
 
 		command, ok := commands[cleaned[0]]
 		if !ok {
 			fmt.Println("That command does not exist")
 		}
 
-		err := command.callback(&config, &cache, arg)
+		err := command.callback(&config, &cache, cleaned[1:])
 		if err != nil {
 			fmt.Println(fmt.Errorf("Encountered error whilst running command %v: %v",
 				command.name, err))

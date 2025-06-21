@@ -12,7 +12,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*configuration, *pokecache.Cache, ...string) error
+	callback    func(*configuration, *pokecache.Cache, []string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -45,20 +45,30 @@ func getCommands() map[string]cliCommand {
 		},
 		"catch": {
 			name:        "catch",
-			description: "Catch a pokemon. Chance to catch based off of level of pokemon",
+			description: "Catch a pokemon. Chance to catch based off of level of pokemon. Takes one pokemon as an argument",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Displays information about caught pokemon. Takes one pokemon as an argument",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Displays all caught pokemon",
+			callback:    commandPokedex,
 		},
 	}
 	return commands
 }
 
-func commandExit(*configuration, *pokecache.Cache, ...string) error {
+func commandExit(*configuration, *pokecache.Cache, []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(*configuration, *pokecache.Cache, ...string) error {
+func commandHelp(*configuration, *pokecache.Cache, []string) error {
 	commands := getCommands()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
@@ -69,7 +79,7 @@ func commandHelp(*configuration, *pokecache.Cache, ...string) error {
 	return nil
 }
 
-func commandMap(config *configuration, cache *pokecache.Cache, _ ...string) error {
+func commandMap(config *configuration, cache *pokecache.Cache, _ []string) error {
 	// Inserted this code to handle if you got to the end of the map but triggers on the first
 	// TODO: Needs special casing on the first call ...
 	// if config.nextUrl == nil {
@@ -92,7 +102,7 @@ func commandMap(config *configuration, cache *pokecache.Cache, _ ...string) erro
 	return nil
 }
 
-func commandMapb(config *configuration, cache *pokecache.Cache, _ ...string) error {
+func commandMapb(config *configuration, cache *pokecache.Cache, _ []string) error {
 	if config.prevUrl == nil {
 		fmt.Println("You're on the first page")
 		return nil
@@ -113,7 +123,7 @@ func commandMapb(config *configuration, cache *pokecache.Cache, _ ...string) err
 	return nil
 }
 
-func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string) error {
+func commandExplore(_ *configuration, cache *pokecache.Cache, location []string) error {
 	locationDetails, err := pokeapi.ExploreLocation(location[0], cache)
 	if err != nil {
 		return err
@@ -126,20 +136,56 @@ func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string
 	return nil
 }
 
-func commandCatch(conf *configuration, cache *pokecache.Cache, mon ...string) error {
+func commandCatch(conf *configuration, cache *pokecache.Cache, mon []string) error {
 	pokemon, err := pokeapi.GetPokemon(mon[0], cache)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("Throwing a Pokeball at %s...", pokemon.Name))
+	if mon[1] == "masterball" {
+		fmt.Println(fmt.Sprintf("%v was caught!", pokemon.Species.Name))
+		conf.caught[pokemon.Species.Name] = pokemon
+		return nil
+	}
+
+	fmt.Println(fmt.Sprintf("Throwing a Pokeball at %s...", pokemon.Species.Name))
 
 	catchInt := rand.IntN(100)
 	if catchInt > pokemon.BaseExperience {
-		fmt.Println(fmt.Sprintf("%v was caught!", pokemon.Name))
-		conf.caught[pokemon.Name] = pokemon
+		fmt.Println(fmt.Sprintf("%v was caught!", pokemon.Species.Name))
+		conf.caught[pokemon.Species.Name] = pokemon
 	} else {
-		fmt.Println(fmt.Sprintf("%v escaped!", pokemon.Name))
+		fmt.Println(fmt.Sprintf("%v escaped!", pokemon.Species.Name))
+	}
+
+	return nil
+}
+
+func commandInspect(conf *configuration, _ *pokecache.Cache, mon []string) error {
+	pokemon, ok := conf.caught[mon[0]]
+	if !ok {
+		fmt.Println("You have not caught that pokemon yet")
+		return nil
+	}
+
+	fmt.Println(fmt.Sprintf("Name: %s", pokemon.Species.Name))
+	fmt.Println(fmt.Sprintf("Height: %v", pokemon.Height))
+	fmt.Println(fmt.Sprintf("Weight: %v", pokemon.Height))
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Println(fmt.Sprintf("  -%v: %v", stat.Stat.Name, stat.BaseStat))
+	}
+	fmt.Println("Types:")
+	for _, monType := range pokemon.Types {
+		fmt.Println(fmt.Sprintf("  -%v", monType.Type.Name))
+	}
+	return nil
+}
+
+func commandPokedex(conf *configuration, _ *pokecache.Cache, _ []string) error {
+	fmt.Println("Your pokedex:")
+	for mon := range conf.caught {
+		fmt.Println(fmt.Sprintf("  -%s", mon))
 	}
 
 	return nil
