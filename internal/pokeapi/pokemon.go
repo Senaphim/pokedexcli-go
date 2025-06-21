@@ -62,8 +62,8 @@ type Pokemon struct {
 				Name string `json:"name"`
 				Url  string `json:"url"`
 			} `json:"move_learn_method"`
-			Order        *string `json:"order"`
-			VersionGroup []struct {
+			Order        *int `json:"order"`
+			VersionGroup struct {
 				Name string `json:"name"`
 				Url  string `json:"url"`
 			} `json:"version_group"`

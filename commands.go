@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 
 	"github.com/senaphim/pokedexcli/internal/pokeapi"
@@ -41,6 +42,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "Takes one argument of location. Displays pokeman catchable at that location",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Catch a pokemon. Chance to catch based off of level of pokemon",
+			callback:    commandCatch,
 		},
 	}
 	return commands
@@ -120,7 +126,21 @@ func commandExplore(_ *configuration, cache *pokecache.Cache, location ...string
 	return nil
 }
 
-func commandCatch(_ *configuration, cache *pokecache.Cache, location ...string) error {
+func commandCatch(conf *configuration, cache *pokecache.Cache, mon ...string) error {
+	pokemon, err := pokeapi.GetPokemon(mon[0], cache)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("Throwing a Pokeball at %s...", pokemon.Name))
+
+	catchInt := rand.IntN(100)
+	if catchInt > pokemon.BaseExperience {
+		fmt.Println(fmt.Sprintf("%v was caught!", pokemon.Name))
+		conf.caught[pokemon.Name] = pokemon
+	} else {
+		fmt.Println(fmt.Sprintf("%v escaped!", pokemon.Name))
+	}
 
 	return nil
 }

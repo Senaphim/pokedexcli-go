@@ -7,16 +7,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/senaphim/pokedexcli/internal/pokeapi"
 	"github.com/senaphim/pokedexcli/internal/pokecache"
 )
 
 type configuration struct {
 	nextUrl *string
 	prevUrl *string
+	caught  map[string]pokeapi.Pokemon
 }
 
 func main() {
 	var config configuration
+	config.caught = make(map[string]pokeapi.Pokemon)
 	cache := pokecache.NewCache(5 * time.Second)
 	commands := getCommands()
 
